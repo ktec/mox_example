@@ -34,5 +34,5 @@ the time of application boot.
 
 - What is your suggested approach to deal with this?
 - Are we testing the wrong abstraction?
-- Should we go with a [hand crafted mock](test/support/service_mock.ex)?
+- Should we go with a [hand crafted mock](test/support/mock_service.ex)?
 - Are there any other options to solve this?
