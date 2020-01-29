@@ -3,6 +3,9 @@ defmodule Example.Worker do
 
   alias Example.DefaultService
 
+  # When using ElixirLS, defining the service at compile time will result in an
+  # error because ElixirLS always compiles using MIX_ENV=test which mean @service
+  # will always be set to MockService, which does not have `foo/0`
   # @service Application.get_env(:example, :service, DefaultService)
   # @service DefaultService
 
