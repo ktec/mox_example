@@ -3,15 +3,7 @@ defmodule Example.Worker do
 
   alias Example.DefaultService
 
-  # When using ElixirLS, defining the service at compile time will result in an
-  # error because ElixirLS always compiles using MIX_ENV=test which mean @service
-  # will always be set to MockService, which does not have `foo/0`
-  # @service Application.get_env(:example, :service, DefaultService)
-  # @service DefaultService
-
-  def service() do
-    Application.get_env(:example, :service, DefaultService)
-  end
+  @service Application.get_env(:example, :service, DefaultService)
 
   def start_link(init_arg \\ []) do
     GenServer.start_link(__MODULE__, init_arg, name: __MODULE__)
@@ -21,28 +13,33 @@ defmodule Example.Worker do
     GenServer.call(__MODULE__, :get_foo)
   end
 
-  def init(_init_arg) do
-    initial_state = "no foo for you"
-    {:ok, initial_state, {:continue, :get_foo_from_service}}
+  def initialise_foo() do
+    pid = Process.whereis(__MODULE__)
+    send(pid, :initialise_foo)
   end
 
-  def handle_continue(:get_foo_from_service, _state) do
-    # And here lies the problem. We want to call our service to get
-    # whatever inital state it provides, but in doing so, we break
-    # in the test environment because the MockService doesn't have
-    # a function called `foo/0` until it can be defined in the expects
-    # block within the test - by that time, this code has already
-    # been executed because this GenServer is part of the staticly
-    # defined supervision tree in `application.ex`.
+  def init(_init_arg) do
+    initial_state = "no foo for you"
 
-    value_of_foo =
-      if function_exported?(service(), :foo, 0) do
-        service().foo()
-      else
-        "#{inspect(service())} does not support foo"
-      end
+    case @service do
+      DefaultService ->
+        {:ok, initial_state, {:continue, :get_foo_from_service}}
 
-    {:noreply, value_of_foo}
+      _ ->
+        {:ok, initial_state}
+    end
+  end
+
+  def handle_continue(:get_foo_from_service, state) do
+    send(self(), :initialise_foo)
+
+    {:noreply, state}
+  end
+
+  def handle_info(:initialise_foo, _state) do
+    IO.inspect("initialising foo now")
+    new_state = @service.foo()
+    {:noreply, new_state}
   end
 
   def handle_call(:get_foo, _from, state) do
