@@ -1,3 +1,3 @@
 use Mix.Config
 
-config :example, service: Example.ServiceMock
+config :example, service: Example.MockService

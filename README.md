@@ -1,8 +1,7 @@
-# Example Project Demonstrating Problem using Mox
+# Example
 
-This project highlights an issue when using the Mox library. This problem may
-occur with other mocking libraries, but we're using Mox so that's why this
-example does too.
+This project demonstrates a problem using Mox with a supervised singleton style
+GenServer.
 
 The problem can be briefly summarised as follows:
 
@@ -14,6 +13,16 @@ not invoked during the `GenServer` start up process, so `start_link`, `init`,
 functions, whilst the code may work in production, in tests when a mock is
 defined with `Mox.defmock` call, it is already too late to define an expection.
 
+Here in this project we have:
+
+- [Example.Worker](lib/example.worker.ex)
+- [Supervision Tree](lib/example/application.ex)
+- [Example.DefaultService](lib/example/default_service.ex)
+- [WorkerTest](test/worker_test.ex)
+
+The mock is defined inside the test, but you could of course define the test in
+the `test_helper.ex` as suggested by the [Mox README](https://github.com/dashbitco/mox/blob/master/README.md) but this makes no difference to the result.
+
 There are "work arounds" of course, but none are particularly wholesome.
 
 1. You could define your own TestMock module, which means it will be defined at
@@ -21,19 +30,9 @@ the time of application boot.
 2. You could test for the `Mix.env` or `function_exported?` but uggg!!
 3. You could call `mix test --no-start` and manually start.
 
-## Installation
+## Question
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `example` to your list of dependencies in `mix.exs`:
-
-```elixir
-def deps do
-  [
-    {:example, "~> 0.1.0"}
-  ]
-end
-```
-
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/example](https://hexdocs.pm/example).
+- What is your suggested approach to deal with this?
+- Are we testing the wrong abstraction?
+- Should we go with a [hand crafted mock](test/support/service_mock.ex)?
+- Are there any other options to solve this?

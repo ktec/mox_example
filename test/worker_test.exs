@@ -5,16 +5,17 @@ defmodule Example.WorkerTest do
 
   describe "default service" do
     test "returns default service foo" do
-      assert Worker.get_foo =~ ~s(default says foo)
+      assert Worker.get_foo() =~ ~s(default says foo)
     end
   end
 
   describe "mocked service" do
     setup do
-      Mox.defmock(Example.ServiceMock, for: Example.ServiceBehaviour)
+      # Normally you would add this to `test_helper.ex`, or `support/mocks.ex
+      Mox.defmock(Example.MockService, for: Example.ServiceBehaviour)
 
-      Example.ServiceMock
-      |> expect(:foo, fn -> ["setup all says foo"] end)
+      Example.MockService
+      |> expect(:foo, fn -> "setup all says foo" end)
 
       :ok
     end
@@ -22,10 +23,11 @@ defmodule Example.WorkerTest do
     setup :verify_on_exit!
 
     test "returns mocked service foo" do
-      Example.ServiceMock
-      |> expect(:foo, fn -> ["mock says foo"] end)
+      Example.MockService
+      |> expect(:foo, fn -> "mock says foo" end)
+      |> allow(self(), Process.whereis(Worker))
 
-      assert Worker.get_foo =~ ~s(mock says foo)
+      assert Worker.get_foo() =~ ~s(mock says foo)
     end
   end
 end

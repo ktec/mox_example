@@ -2,7 +2,7 @@
 # before the application starts up, but do we even need Mox at
 # this point?
 #
-# defmodule Example.ServiceMock do
+# defmodule Example.MockService do
 #   @behaviour Example.ServiceBehaviour
 #
 #   def foo() do
