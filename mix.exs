@@ -8,6 +8,7 @@ defmodule Example.MixProject do
       elixir: "~> 1.9",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
+      aliases: aliases(),
       deps: deps()
     ]
   end
@@ -30,6 +31,12 @@ defmodule Example.MixProject do
       # {:dep_from_hexpm, "~> 0.3.0"},
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
       {:mox, "~> 0.5.1", only: :test}
+    ]
+  end
+
+  def aliases do
+    [
+      test: "test --no-start"
     ]
   end
 end
