@@ -19,7 +19,8 @@ defmodule Example.Worker do
   end
 
   def init(_init_arg) do
-    {:ok, [], {:continue, :get_foo_from_service}}
+    initial_state = "no foo for you"
+    {:ok, initial_state, {:continue, :get_foo_from_service}}
   end
 
   def handle_continue(:get_foo_from_service, _state) do
@@ -35,7 +36,7 @@ defmodule Example.Worker do
       if function_exported?(service(), :foo, 0) do
         service().foo()
       else
-        "#{inspect service()} does not support foo"
+        "#{inspect(service())} does not support foo"
       end
 
     {:noreply, value_of_foo}
