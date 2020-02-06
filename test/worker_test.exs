@@ -3,29 +3,18 @@ defmodule Example.WorkerTest do
   import Mox
   alias Example.Worker
 
-  describe "default service" do
-    test "returns default service foo" do
-      assert Worker.get_foo() =~ ~s(default says foo)
-    end
-  end
+  setup :verify_on_exit!
 
   describe "mocked service" do
-    setup do
-      # Normally you would add this to `test_helper.ex`, or `support/mocks.ex
-      Mox.defmock(Example.MockService, for: Example.ServiceBehaviour)
-
-      Example.MockService
-      |> expect(:foo, fn -> "setup all says foo" end)
-
-      :ok
-    end
-
-    setup :verify_on_exit!
+    # We have to set Mox to global because we would have an impossible chicken
+    # and egg situation wtih Mox.allow/2 and Worker.start_link/0
+    setup :set_mox_global
 
     test "returns mocked service foo" do
       Example.MockService
       |> expect(:foo, fn -> "mock says foo" end)
-      |> allow(self(), Process.whereis(Worker))
+
+      Worker.start_link()
 
       assert Worker.get_foo() =~ ~s(mock says foo)
     end
