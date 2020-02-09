@@ -1,17 +1,10 @@
 defmodule Example.Worker do
   use GenServer
 
-  alias Example.DefaultService
+  alias Example.Effect
+  alias Example.Service
 
-  # When using ElixirLS, defining the service at compile time will result in an
-  # error because ElixirLS always compiles using MIX_ENV=test which mean @service
-  # will always be set to MockService, which does not have `foo/0`
-  # @service Application.get_env(:example, :service, DefaultService)
-  # @service DefaultService
-
-  def service() do
-    Application.get_env(:example, :service, DefaultService)
-  end
+  @interpretor Application.get_env(:example, :interpretor, Example.Interpreter)
 
   def start_link(init_arg \\ []) do
     GenServer.start_link(__MODULE__, init_arg, name: __MODULE__)
@@ -27,20 +20,9 @@ defmodule Example.Worker do
   end
 
   def handle_continue(:get_foo_from_service, _state) do
-    # And here lies the problem. We want to call our service to get
-    # whatever inital state it provides, but in doing so, we break
-    # in the test environment because the MockService doesn't have
-    # a function called `foo/0` until it can be defined in the expects
-    # block within the test - by that time, this code has already
-    # been executed because this GenServer is part of the staticly
-    # defined supervision tree in `application.ex`.
 
-    value_of_foo =
-      if function_exported?(service(), :foo, 0) do
-        service().foo()
-      else
-        "#{inspect(service())} does not support foo"
-      end
+    # SIDE EFFECT HERE!!!
+    value_of_foo = @interpretor.run(%Effect{m: Service, f: :foo, a: []})
 
     {:noreply, value_of_foo}
   end
