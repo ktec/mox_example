@@ -1,33 +1,30 @@
 defmodule Example.WorkerTest do
   use ExUnit.Case
-  import Mox
   alias Example.Worker
 
-  describe "default service" do
-    test "returns default service foo" do
-      assert Worker.get_foo() =~ ~s(default says foo)
-    end
+  # In order to have the Worker use the test services we need to restart
+  # the process; killing it will suffice as it is a supervised process
+  def restart_worker() do
+    pid = Process.whereis(Worker)
+    Process.exit(pid, :kill)
+    Process.sleep(10)
   end
 
   describe "mocked service" do
-    setup do
-      # Normally you would add this to `test_helper.ex`, or `support/mocks.ex
-      Mox.defmock(Example.MockService, for: Example.ServiceBehaviour)
+    test "returns mocked service foo" do
+      Application.put_env(:example, :service, Test1Service)
 
-      Example.MockService
-      |> expect(:foo, fn -> "setup all says foo" end)
+      restart_worker()
 
-      :ok
+      assert Worker.get_foo() =~ ~s(test 1 says foo)
     end
 
-    setup :verify_on_exit!
+    test "returns mocked service moo" do
+      Application.put_env(:example, :service, Test2Service)
 
-    test "returns mocked service foo" do
-      Example.MockService
-      |> expect(:foo, fn -> "mock says foo" end)
-      |> allow(self(), Process.whereis(Worker))
+      restart_worker()
 
-      assert Worker.get_foo() =~ ~s(mock says foo)
+      assert Worker.get_foo() =~ ~s(test 2 says moo)
     end
   end
 end
