@@ -36,3 +36,23 @@ the time of application boot.
 - Are we testing the wrong abstraction?
 - Should we go with a [hand crafted mock](test/support/mock_service.ex)?
 - Are there any other options to solve this?
+
+
+## Interpreter
+
+This branch removes all mocks, and the behaviour. Now we just have a single
+definition of our service `Example.Service`. This instantly makes the code
+simpler to read and follow. In order to connect our worker to the service we
+add a new layer of indirection called the interpreter `Example.Interpreter`.
+Instead of calling the service directly, the worker creates a description of
+the side effect `Example.Effect` and passes that to the interpreter. In
+production the default interpreter is configured to translate the effect into a
+real world effect, and in the test environment we replace the default
+interpreter with a test interpreter `Test.Interpreter` which simply returns
+the effect - and we can simply assert the shape of the effect is correct.
+
+So whats missing here, what tests are we missing?
+
+some research links:
+- https://github.com/yunmikun2/free_ast/blob/master/lib/free_ast.ex
+- https://github.com/slogsdon/elixir-control/
