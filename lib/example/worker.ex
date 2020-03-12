@@ -67,4 +67,14 @@ defmodule Example.Worker do
     # _product = @interpretor.run(Effect.new(Services.Database, :update, updated_product))
     _product = @interpretor.run(s2)
   end
+
+  def get_data() do
+    s1 = effect(Example.Services.Http.fetch())
+    i1 = Application.get_env(:example, :interpretor2, Example.Interpreter)
+
+    case i1.run(s1) do
+      {:ok, _headers, body} -> body
+      {:error, reason} -> reason
+    end
+  end
 end
