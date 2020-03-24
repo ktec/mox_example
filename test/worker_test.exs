@@ -29,7 +29,7 @@ defmodule Example.WorkerTest do
   describe "get_data/0" do
     test "it works" do
       defmodule TestSuccess do
-        def run(%Effect{f: :fetch, m: Services.Http}) do
+        def run(%Effect{m: Services.Http, f: :fetch}) do
           {:ok, [], "here is result 2"}
         end
       end
@@ -43,7 +43,7 @@ defmodule Example.WorkerTest do
 
     test "it fails" do
       defmodule TestFailure do
-        def run(%Effect{f: :fetch, m: Services.Http}) do
+        def run(%Effect{m: Services.Http, f: :fetch}) do
           {:error, "There was an error"}
         end
       end
@@ -53,6 +53,14 @@ defmodule Example.WorkerTest do
       expected_effect = "There was an error"
 
       assert Worker.get_data() == expected_effect
+    end
+  end
+
+  describe "get_data2/0" do
+    test "it works!" do
+      expected_effect = "hello anons"
+
+      assert Worker.get_data2() == expected_effect
     end
   end
 end

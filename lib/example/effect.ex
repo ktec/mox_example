@@ -15,13 +15,37 @@ defmodule Example.Effect do
 
   def new(m, f, a \\ []), do: %__MODULE__{m: m, f: f, a: List.wrap(a)}
 
-  defmacro effect(block) do
-    {{_, _, [{_, _, mod}, f]}, _, args} = block
+  defmacro effect(expr) do
+    expr =
+      case expr do
+        [do: expr] -> expr
+        expr -> expr
+      end
 
-    m = Module.concat(mod)
+    IO.inspect(expr, label: "expr")
 
-    quote bind_quoted: [m: m, f: f, args: args] do
-      Effect.new(m, f, args)
+    case expr do
+      {{_, _, [{_, _, mod}, f]}, _, args} ->
+        m = Module.concat(mod)
+
+        quote bind_quoted: [m: m, f: f, args: args] do
+          Effect.new(m, f, args)
+        end
+
+      {m, _, [{_f, _, [[], args]}]} ->
+        # {f, args} = Code.eval_quoted(expr)
+        f = expr
+
+        quote bind_quoted: [m: m, f: f, args: args] do
+          Effect.new(nil, f, args)
+        end
+
+        # {f, _, args} ->
+        #   m = Macro.escape(__CALLER__)
+        #
+        #   quote bind_quoted: [m: m, f: f, args: args] do
+        #     Effect.new(m, f, args)
+        #   end
     end
   end
 

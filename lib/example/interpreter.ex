@@ -20,6 +20,10 @@ defmodule Example.Interpreter do
   #   end
   # end
 
+  def run(%Effect{m: nil, f: f, a: a} = _effect) do
+    apply(f, a)
+  end
+
   def run(%Effect{m: m, f: f, a: a} = _effect) do
     apply(m, f, a)
   end

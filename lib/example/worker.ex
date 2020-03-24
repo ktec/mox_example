@@ -77,4 +77,19 @@ defmodule Example.Worker do
       {:error, reason} -> reason
     end
   end
+
+  def get_data2() do
+    s1 =
+      effect do
+        # fn -> "hello anons" end
+        Example.Services.Http.fetch()
+      end
+
+    i1 = Application.get_env(:example, :interpretor2, Example.Interpreter)
+
+    case i1.run(s1) do
+      {:ok, _headers, body} -> body
+      {:error, reason} -> reason
+    end
+  end
 end
